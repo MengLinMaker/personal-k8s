@@ -149,22 +149,14 @@ tasks:
       - KUBECONFIG="$PWD/kubeconfig" kubectl -n kube-system port-forward svc/hubble-ui 12000:80
 
   k3s:flux:
-    desc: Bootstrap Flux on the single-node hetzner-k3s cluster
+    desc: Install Flux and point it at the public personal-k8s repo
     dir: "{{.K3S_DIR}}"
     dotenv:
       - .env
     preconditions:
-      - sh: test -n "$GITHUB_TOKEN"
-        msg: GITHUB_TOKEN must be set
-      - sh: test -n "$GITHUB_USER"
-        msg: GITHUB_USER must be set
       - sh: test -f kubeconfig
         msg: Run task k3s:deploy first
     cmds:
-      - |
-        KUBECONFIG="$PWD/kubeconfig" flux bootstrap github \
-          --owner="$GITHUB_USER" \
-          --repository=personal-k8s \
-          --branch=main \
-          --path=clusters/personal-k3s \
-          --personal
+      - KUBECONFIG="$PWD/kubeconfig" flux install
+      - KUBECONFIG="$PWD/kubeconfig" flux create source git personal-k8s --url=https://github.com/MengLinMaker/personal-k8s --branch=main --interval=10m
+      - KUBECONFIG="$PWD/kubeconfig" flux create kustomization personal-k8s --source=personal-k8s --path=./clusters/personal-k3s --prune=true --interval=10m

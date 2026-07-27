@@ -26,8 +26,7 @@ cp hetzner-k3s/.env.example hetzner-k3s/.env
 Edit `hetzner-k3s/.env` and set:
 
 - `HCLOUD_TOKEN`
-- `GITHUB_TOKEN`
-- `GITHUB_USER`
+- `K3S_HOST`
 
 Edit `cluster.yaml`:
 
@@ -73,6 +72,8 @@ task k3s:hubble
 Then open `http://localhost:12000`.
 
 ## Bootstrap Flux
+
+This uses public HTTPS Git access. No GitHub token is needed as long as the repository is public.
 
 From the repository root:
 
