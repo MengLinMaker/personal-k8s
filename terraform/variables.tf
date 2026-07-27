@@ -4,18 +4,6 @@ variable "hcloud_token" {
   sensitive   = true
 }
 
-variable "server_type" {
-  description = "Hetzner server type. CPX12 is 1 vCPU x86 / 2GB RAM / 40GB disk."
-  type        = string
-  default     = "cpx12"
-}
-
-variable "location" {
-  description = "Hetzner location. fsn1 is Falkenstein, Germany; nbg1 is Nuremberg, Germany."
-  type        = string
-  default     = "fsn1"
-}
-
 variable "ssh_key_ids" {
   description = "Existing Hetzner SSH key IDs/names to attach to the server."
   type        = list(string)

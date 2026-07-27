@@ -1,11 +1,5 @@
 hcloud_token = "replace-with-hcloud-token"
 
-# fsn1 = Falkenstein, Germany
-# nbg1 = Nuremberg, Germany
-location = "fsn1"
-
-server_type = "cpx12"
-
 # Replace with your current public IP, e.g. ["203.0.113.10/32"].
 allowed_ssh_cidrs = ["203.0.113.10/32"]
 

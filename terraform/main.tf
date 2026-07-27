@@ -18,9 +18,9 @@ resource "hcloud_firewall" "base" {
 
 resource "hcloud_server" "base" {
   name        = "personal-k8s-node-1"
-  server_type = var.server_type
+  server_type = "cpx12"
   image       = "ubuntu-24.04"
-  location    = var.location
+  location    = "fsn1"
   ssh_keys    = var.ssh_key_ids
   labels      = var.labels
 
