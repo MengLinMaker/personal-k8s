@@ -10,6 +10,19 @@ variable "ssh_key_ids" {
   default     = []
 }
 
+variable "tailscale_auth_key" {
+  description = "Optional Tailscale auth key used to join the server to the tailnet during cloud-init."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "enable_tailscale" {
+  description = "Whether cloud-init should install Tailscale and join the server to your tailnet."
+  type        = bool
+  default     = false
+}
+
 variable "allowed_admin_cidrs" {
   description = "CIDR blocks allowed to access the Dokploy admin panel, and SSH when ssh_key_ids is not empty."
   type        = list(string)
