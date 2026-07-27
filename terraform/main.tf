@@ -1,16 +1,5 @@
-resource "hcloud_ssh_key" "default" {
-  count      = var.ssh_public_key == null ? 0 : 1
-  name       = "${var.server_name}-ssh"
-  public_key = var.ssh_public_key
-  labels     = var.labels
-}
-
-locals {
-  ssh_keys = var.ssh_public_key == null ? var.ssh_key_ids : [hcloud_ssh_key.default[0].id]
-}
-
 resource "hcloud_firewall" "base" {
-  name   = "${var.server_name}-firewall"
+  name   = "personal-k8s-node-1-firewall"
   labels = var.labels
 
   rule {
@@ -28,11 +17,11 @@ resource "hcloud_firewall" "base" {
 }
 
 resource "hcloud_server" "base" {
-  name        = var.server_name
+  name        = "personal-k8s-node-1"
   server_type = var.server_type
-  image       = var.image
+  image       = "ubuntu-24.04"
   location    = var.location
-  ssh_keys    = local.ssh_keys
+  ssh_keys    = var.ssh_key_ids
   labels      = var.labels
 
   firewall_ids = [hcloud_firewall.base.id]
