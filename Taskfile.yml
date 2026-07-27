@@ -4,6 +4,7 @@ vars:
   TF_DIR: terraform
   IMAGE_DIR: terraform/image
   CLUSTER_DIR: terraform/cluster
+  DOKPLOY_DIR: terraform/dokploy
 
 tasks:
   default:
@@ -27,8 +28,7 @@ tasks:
   lint:
     desc: Lint OpenTofu configuration
     cmds:
-      - tofu -chdir={{.IMAGE_DIR}} validate
-      - tofu -chdir={{.CLUSTER_DIR}} validate
+      - tofu -chdir={{.DOKPLOY_DIR}} validate
 
   watch:lint:
     desc: Watch OpenTofu files and lint on change; does not touch live infrastructure
@@ -37,8 +37,7 @@ tasks:
       - "{{.TF_DIR}}/**/*.tf"
       - "{{.TF_DIR}}/**/*.tfvars"
     cmds:
-      - tofu -chdir={{.IMAGE_DIR}} validate
-      - tofu -chdir={{.CLUSTER_DIR}} validate
+      - tofu -chdir={{.DOKPLOY_DIR}} validate
 
   check:
     desc: Format and lint OpenTofu
@@ -52,8 +51,7 @@ tasks:
       - "{{.TF_DIR}}/**/*.tfvars"
     cmds:
       - tofu -chdir={{.TF_DIR}} fmt -recursive
-      - tofu -chdir={{.IMAGE_DIR}} validate
-      - tofu -chdir={{.CLUSTER_DIR}} validate
+      - tofu -chdir={{.DOKPLOY_DIR}} validate
 
   plan:image:
     desc: Plan Talos image changes
@@ -74,3 +72,13 @@ tasks:
     desc: Apply cluster changes
     cmds:
       - tofu -chdir={{.CLUSTER_DIR}} apply
+
+  plan:dokploy:
+    desc: Plan Dokploy server changes
+    cmds:
+      - tofu -chdir={{.DOKPLOY_DIR}} plan
+
+  apply:dokploy:
+    desc: Apply Dokploy server changes
+    cmds:
+      - tofu -chdir={{.DOKPLOY_DIR}} apply

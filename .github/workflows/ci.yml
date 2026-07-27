@@ -27,9 +27,7 @@ jobs:
         uses: go-task/setup-task@v1
 
       - name: OpenTofu init
-        run: |
-          tofu -chdir=terraform/image init -backend=false
-          tofu -chdir=terraform/cluster init -backend=false
+        run: tofu -chdir=terraform/dokploy init -backend=false
 
       - name: OpenTofu check
         run: task check
