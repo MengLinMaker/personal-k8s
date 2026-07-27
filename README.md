@@ -2,21 +2,6 @@
 
 Provisioning a Kubernetes cluster for personal projects.
 
-## Deployment Flow
-
-Technologies are chosen to form a base layer that can be used for other projects.
-
-Deployment is layered:
-
-1. OpenTofu creates a Hetzner Talos image with the Tailscale extension baked in.
-2. OpenTofu provisions Hetzner infrastructure using that Talos image.
-3. Talos boots and forms the Kubernetes cluster.
-4. Cilium is installed as the Kubernetes CNI.
-5. OpenTofu installs Argo CD with Helm.
-6. OpenTofu creates the root Argo CD Application.
-7. Argo CD pulls `kubernetes/` from this repo.
-8. Argo CD installs baseline controllers such as cert-manager and Argo Rollouts.
-
 ## Dependencies
 
 Install the local tools:
