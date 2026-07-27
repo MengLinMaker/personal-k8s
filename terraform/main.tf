@@ -43,3 +43,14 @@ module "talos" {
   deploy_cilium                = true
   worker_nodes                 = []
 }
+
+resource "helm_release" "argocd" {
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  version          = "8.5.7"
+  namespace        = "argocd"
+  create_namespace = true
+
+  depends_on = [module.talos]
+}
