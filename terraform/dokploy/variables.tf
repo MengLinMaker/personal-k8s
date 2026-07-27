@@ -4,14 +4,14 @@ variable "hcloud_token" {
   sensitive   = true
 }
 
-variable "ssh_key_ids" {
-  description = "Optional Hetzner SSH key IDs allowed to access the server. Leave empty to disable normal SSH bootstrap access."
-  type        = list(string)
-  default     = []
+variable "tailscale_auth_key" {
+  description = "Tailscale auth key used to join the Dokploy server to the tailnet and advertise the Dokploy Docker subnet."
+  type        = string
+  sensitive   = true
 }
 
 variable "allowed_admin_cidrs" {
-  description = "CIDR blocks allowed to access the Dokploy admin panel, and SSH when ssh_key_ids is not empty."
+  description = "CIDR blocks allowed to access the Dokploy admin panel."
   type        = list(string)
 }
 

@@ -24,7 +24,7 @@ cp terraform/dokploy/terraform.tfvars.example terraform/dokploy/terraform.tfvars
 
 Apply `terraform/dokploy` to create the server and install Dokploy.
 
-SSH keys are optional. By default, `ssh_key_ids = []`, and the server is managed through the Dokploy UI first. If you add Hetzner SSH key IDs later, OpenTofu also opens SSH from `allowed_admin_cidrs`.
+Tailscale is bootstrapped automatically after Dokploy starts installing. The bootstrap script waits for `dokploy-network`, advertises that Docker subnet, and enables Tailscale SSH.
 
 ## Commands
 

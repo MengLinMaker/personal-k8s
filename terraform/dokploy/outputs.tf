@@ -22,8 +22,3 @@ output "dokploy_url" {
   description = "Initial Dokploy panel URL. Access is restricted by the Hetzner firewall to allowed_admin_cidrs."
   value       = "http://${hcloud_server.dokploy.ipv4_address}:3000"
 }
-
-output "ssh_command" {
-  description = "SSH command for the Dokploy server, when ssh_key_ids is not empty."
-  value       = length(var.ssh_key_ids) > 0 ? "ssh root@${hcloud_server.dokploy.ipv4_address}" : null
-}
