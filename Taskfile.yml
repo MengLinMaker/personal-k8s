@@ -2,6 +2,8 @@ version: "3"
 
 vars:
   TF_DIR: terraform
+  IMAGE_DIR: terraform/image
+  CLUSTER_DIR: terraform/cluster
 
 tasks:
   default:
@@ -12,7 +14,7 @@ tasks:
   fmt:
     desc: Format OpenTofu files
     cmds:
-      - tofu -chdir={{.TF_DIR}} fmt
+      - tofu -chdir={{.TF_DIR}} fmt -recursive
 
   watch:fmt:
     desc: Watch OpenTofu files and format on change; does not touch live infrastructure
@@ -20,12 +22,13 @@ tasks:
     sources:
       - "{{.TF_DIR}}/**/*.tf"
     cmds:
-      - tofu -chdir={{.TF_DIR}} fmt
+      - tofu -chdir={{.TF_DIR}} fmt -recursive
 
   lint:
     desc: Lint OpenTofu configuration
     cmds:
-      - tofu -chdir={{.TF_DIR}} validate
+      - tofu -chdir={{.IMAGE_DIR}} validate
+      - tofu -chdir={{.CLUSTER_DIR}} validate
 
   watch:lint:
     desc: Watch OpenTofu files and lint on change; does not touch live infrastructure
@@ -34,7 +37,8 @@ tasks:
       - "{{.TF_DIR}}/**/*.tf"
       - "{{.TF_DIR}}/**/*.tfvars"
     cmds:
-      - tofu -chdir={{.TF_DIR}} validate
+      - tofu -chdir={{.IMAGE_DIR}} validate
+      - tofu -chdir={{.CLUSTER_DIR}} validate
 
   check:
     desc: Format and lint OpenTofu
@@ -47,15 +51,26 @@ tasks:
       - "{{.TF_DIR}}/**/*.tf"
       - "{{.TF_DIR}}/**/*.tfvars"
     cmds:
-      - tofu -chdir={{.TF_DIR}} fmt
-      - tofu -chdir={{.TF_DIR}} validate
+      - tofu -chdir={{.TF_DIR}} fmt -recursive
+      - tofu -chdir={{.IMAGE_DIR}} validate
+      - tofu -chdir={{.CLUSTER_DIR}} validate
 
-  plan:
-    desc: Plan OpenTofu changes
+  plan:image:
+    desc: Plan Talos image changes
     cmds:
-      - tofu -chdir={{.TF_DIR}} plan
+      - tofu -chdir={{.IMAGE_DIR}} plan
 
-  apply:
-    desc: Apply OpenTofu changes
+  apply:image:
+    desc: Apply Talos image changes
     cmds:
-      - tofu -chdir={{.TF_DIR}} apply
+      - tofu -chdir={{.IMAGE_DIR}} apply
+
+  plan:cluster:
+    desc: Plan cluster changes
+    cmds:
+      - tofu -chdir={{.CLUSTER_DIR}} plan
+
+  apply:cluster:
+    desc: Apply cluster changes
+    cmds:
+      - tofu -chdir={{.CLUSTER_DIR}} apply

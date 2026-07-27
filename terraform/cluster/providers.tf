@@ -1,7 +1,3 @@
-provider "imager" {
-  token = var.hcloud_token
-}
-
 provider "helm" {
   kubernetes = {
     host                   = module.talos.kubeconfig_data.host

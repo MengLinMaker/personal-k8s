@@ -7,19 +7,9 @@ terraform {
       version = "3.2.0"
     }
 
-    imager = {
-      source  = "hcloud-talos/imager"
-      version = "1.0.17"
-    }
-
     kubectl = {
       source  = "alekc/kubectl"
       version = "2.4.1"
-    }
-
-    talos = {
-      source  = "siderolabs/talos"
-      version = "0.11.0"
     }
   }
 }

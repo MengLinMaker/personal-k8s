@@ -1,5 +1,6 @@
 hcloud_token = "replace-with-hcloud-token"
 tailscale_auth_key = "replace-with-tailscale-auth-key"
+talos_image_id_x86 = "replace-with-hcloud-talos-x86-snapshot-id"
 
 # Replace with your current public IP, e.g. ["203.0.113.10/32"].
 allowed_admin_cidrs = ["203.0.113.10/32"]

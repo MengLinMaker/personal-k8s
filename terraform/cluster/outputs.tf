@@ -22,5 +22,5 @@ output "public_ipv4_list" {
 
 output "talos_image_id" {
   description = "Hetzner snapshot image ID used for x86 Talos nodes."
-  value       = imager_image.talos_x86.image_id
+  value       = var.talos_image_id_x86
 }
