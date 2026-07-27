@@ -14,11 +14,16 @@ spec:
       valuesObject:
         config:
           inCluster: true
+          unsafeUseServiceAccountToken: true
           enableHelm: false
         pluginsManager:
           enabled: false
+        serviceAccount:
+          create: true
+          name: headlamp
         service:
-          type: ClusterIP
+          type: NodePort
+          nodePort: 30080
         resources:
           requests:
             cpu: 25m

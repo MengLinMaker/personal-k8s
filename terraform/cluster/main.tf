@@ -33,6 +33,15 @@ module "talos" {
   firewall_use_current_ip   = false
   firewall_kube_api_source  = local.admin_cidrs
   firewall_talos_api_source = local.admin_cidrs
+  extra_firewall_rules = [
+    {
+      description = "Allow Incoming Requests to Headlamp"
+      direction   = "in"
+      protocol    = "tcp"
+      port        = "30080"
+      source_ips  = local.admin_cidrs
+    }
+  ]
 
   control_plane_nodes = [
     {
