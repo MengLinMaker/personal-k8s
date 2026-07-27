@@ -58,6 +58,14 @@ task k3s:kubectl -- top nodes
 task k3s:kubectl -- top pods -A --sort-by=cpu
 ```
 
+Hubble UI:
+
+```sh
+task k3s:hubble
+```
+
+Then open `http://localhost:12000`.
+
 ## Bootstrap Flux
 
 From the repository root:
