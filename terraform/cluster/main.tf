@@ -1,5 +1,16 @@
 locals {
   talos_version = "v1.12.8"
+
+  scalr_admin_cidrs = [
+    for ip in split("\n", trimspace(data.http.scalr_ips_allowlist.response_body)) :
+    "${ip}/32"
+  ]
+
+  admin_cidrs = concat(var.allowed_admin_cidrs, local.scalr_admin_cidrs)
+}
+
+data "http" "scalr_ips_allowlist" {
+  url = "https://scalr.io/.well-known/allowlist.txt"
 }
 
 module "talos" {
@@ -20,8 +31,8 @@ module "talos" {
   disable_arm = true
 
   firewall_use_current_ip   = false
-  firewall_kube_api_source  = var.allowed_admin_cidrs
-  firewall_talos_api_source = var.allowed_admin_cidrs
+  firewall_kube_api_source  = local.admin_cidrs
+  firewall_talos_api_source = local.admin_cidrs
 
   control_plane_nodes = [
     {

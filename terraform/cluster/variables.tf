@@ -16,7 +16,7 @@ variable "talos_image_id_x86" {
 }
 
 variable "allowed_admin_cidrs" {
-  description = "CIDR blocks allowed to access the Kubernetes and Talos APIs. Set this to your current public IP, e.g. [\"203.0.113.10/32\"]."
+  description = "Extra CIDR blocks allowed to access the Kubernetes and Talos APIs. Scalr hosted runner IPs are added automatically; set this to your current public IP, e.g. [\"203.0.113.10/32\"]."
   type        = list(string)
 }
 
