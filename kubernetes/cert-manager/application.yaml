@@ -14,6 +14,37 @@ spec:
       valuesObject:
         crds:
           enabled: true
+        resources:
+          requests:
+            cpu: 25m
+            memory: 96Mi
+          limits:
+            cpu: 200m
+            memory: 192Mi
+        webhook:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 96Mi
+        cainjector:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+        startupapicheck:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager

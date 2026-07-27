@@ -55,6 +55,81 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   create_namespace = true
 
+  values = [
+    yamlencode({
+      configs = {
+        cm = {
+          "timeout.reconciliation"      = "300s"
+          "timeout.hard.reconciliation" = "600s"
+        }
+      }
+
+      dex = {
+        enabled = false
+      }
+
+      notifications = {
+        enabled = false
+      }
+
+      applicationSet = {
+        enabled = false
+      }
+
+      controller = {
+        resources = {
+          requests = {
+            cpu    = "50m"
+            memory = "256Mi"
+          }
+          limits = {
+            cpu    = "400m"
+            memory = "512Mi"
+          }
+        }
+      }
+
+      repoServer = {
+        resources = {
+          requests = {
+            cpu    = "25m"
+            memory = "128Mi"
+          }
+          limits = {
+            cpu    = "250m"
+            memory = "256Mi"
+          }
+        }
+      }
+
+      server = {
+        resources = {
+          requests = {
+            cpu    = "25m"
+            memory = "128Mi"
+          }
+          limits = {
+            cpu    = "250m"
+            memory = "256Mi"
+          }
+        }
+      }
+
+      redis = {
+        resources = {
+          requests = {
+            cpu    = "25m"
+            memory = "64Mi"
+          }
+          limits = {
+            cpu    = "150m"
+            memory = "128Mi"
+          }
+        }
+      }
+    })
+  ]
+
   depends_on = [module.talos]
 }
 
