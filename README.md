@@ -24,6 +24,8 @@ cp terraform/dokploy/terraform.tfvars.example terraform/dokploy/terraform.tfvars
 
 Apply `terraform/dokploy` to create the server and install Dokploy.
 
+SSH keys are optional. By default, `ssh_key_ids = []`, and the server is managed through the Dokploy UI first. If you add Hetzner SSH key IDs later, OpenTofu also opens SSH from `allowed_admin_cidrs`.
+
 ## Commands
 
 List available tasks:

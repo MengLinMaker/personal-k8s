@@ -1,5 +1,7 @@
 hcloud_token = "replace-with-hcloud-token"
-ssh_key_ids  = ["replace-with-hcloud-ssh-key-id"]
+
+# Optional. Leave empty if you want to manage the server through Dokploy first.
+ssh_key_ids = []
 
 # Replace with your current public IP, e.g. ["203.0.113.10/32"].
 allowed_admin_cidrs = ["203.0.113.10/32"]

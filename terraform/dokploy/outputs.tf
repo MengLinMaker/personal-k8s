@@ -24,6 +24,6 @@ output "dokploy_url" {
 }
 
 output "ssh_command" {
-  description = "SSH command for the Dokploy server."
-  value       = "ssh root@${hcloud_server.dokploy.ipv4_address}"
+  description = "SSH command for the Dokploy server, when ssh_key_ids is not empty."
+  value       = length(var.ssh_key_ids) > 0 ? "ssh root@${hcloud_server.dokploy.ipv4_address}" : null
 }

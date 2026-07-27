@@ -5,12 +5,13 @@ variable "hcloud_token" {
 }
 
 variable "ssh_key_ids" {
-  description = "Hetzner SSH key IDs allowed to access the server."
+  description = "Optional Hetzner SSH key IDs allowed to access the server. Leave empty to disable normal SSH bootstrap access."
   type        = list(string)
+  default     = []
 }
 
 variable "allowed_admin_cidrs" {
-  description = "CIDR blocks allowed to access SSH and the Dokploy admin panel."
+  description = "CIDR blocks allowed to access the Dokploy admin panel, and SSH when ssh_key_ids is not empty."
   type        = list(string)
 }
 

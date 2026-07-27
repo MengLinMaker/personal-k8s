@@ -8,12 +8,16 @@ resource "hcloud_firewall" "dokploy" {
   name   = local.server_name
   labels = var.labels
 
-  rule {
-    description = "Allow SSH from admin CIDRs"
-    direction   = "in"
-    protocol    = "tcp"
-    port        = "22"
-    source_ips  = var.allowed_admin_cidrs
+  dynamic "rule" {
+    for_each = length(var.ssh_key_ids) > 0 ? [1] : []
+
+    content {
+      description = "Allow SSH from admin CIDRs"
+      direction   = "in"
+      protocol    = "tcp"
+      port        = "22"
+      source_ips  = var.allowed_admin_cidrs
+    }
   }
 
   rule {
@@ -52,7 +56,7 @@ resource "hcloud_server" "dokploy" {
   image       = "ubuntu-24.04"
   server_type = local.server_type
   location    = local.location
-  ssh_keys    = var.ssh_key_ids
+  ssh_keys    = length(var.ssh_key_ids) > 0 ? var.ssh_key_ids : null
   backups     = true
   labels      = var.labels
   firewall_ids = [
