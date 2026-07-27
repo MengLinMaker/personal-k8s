@@ -67,12 +67,12 @@ resource "hcloud_server" "dokploy" {
           set -euo pipefail
 
           dokploy_subnet=""
-          for _ in $(seq 1 300); do
+          for _ in $(seq 1 180); do
             dokploy_subnet="$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}}{{end}}' dokploy-network 2>/dev/null || true)"
             if [ -n "$dokploy_subnet" ]; then
               break
             fi
-            sleep 2
+            sleep 10
           done
 
           if [ -z "$dokploy_subnet" ]; then
