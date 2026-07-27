@@ -63,6 +63,8 @@ resource "helm_release" "argocd" {
   version          = "8.5.7"
   namespace        = "argocd"
   create_namespace = true
+  timeout          = 900
+  wait             = false
 
   values = [
     yamlencode({
