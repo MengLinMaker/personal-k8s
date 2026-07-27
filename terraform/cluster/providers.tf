@@ -12,5 +12,6 @@ provider "kubectl" {
   client_certificate     = base64decode(module.talos.kubeconfig_data.client_certificate)
   client_key             = base64decode(module.talos.kubeconfig_data.client_key)
   cluster_ca_certificate = base64decode(module.talos.kubeconfig_data.cluster_ca_certificate)
+  lazy_load              = true
   load_config_file       = false
 }

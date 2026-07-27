@@ -48,6 +48,8 @@ resource "helm_release" "argocd" {
 }
 
 resource "kubectl_manifest" "argocd_root" {
+  validate_schema = false
+
   yaml_body = yamlencode({
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
