@@ -1,0 +1,61 @@
+version: "3"
+
+vars:
+  TF_DIR: terraform
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  fmt:
+    desc: Format Terraform files
+    cmds:
+      - terraform -chdir={{.TF_DIR}} fmt
+
+  watch:fmt:
+    desc: Watch Terraform files and format on change; does not touch live infrastructure
+    watch: true
+    sources:
+      - "{{.TF_DIR}}/**/*.tf"
+    cmds:
+      - terraform -chdir={{.TF_DIR}} fmt
+
+  lint:
+    desc: Lint Terraform configuration
+    cmds:
+      - terraform -chdir={{.TF_DIR}} validate
+
+  watch:lint:
+    desc: Watch Terraform files and lint on change; does not touch live infrastructure
+    watch: true
+    sources:
+      - "{{.TF_DIR}}/**/*.tf"
+      - "{{.TF_DIR}}/**/*.tfvars"
+    cmds:
+      - terraform -chdir={{.TF_DIR}} validate
+
+  check:
+    desc: Format and lint Terraform
+    deps: [fmt, lint]
+
+  watch:check:
+    desc: Watch Terraform files, then format and lint; does not touch live infrastructure
+    watch: true
+    sources:
+      - "{{.TF_DIR}}/**/*.tf"
+      - "{{.TF_DIR}}/**/*.tfvars"
+    cmds:
+      - terraform -chdir={{.TF_DIR}} fmt
+      - terraform -chdir={{.TF_DIR}} validate
+
+  plan:
+    desc: Plan Terraform changes
+    cmds:
+      - terraform -chdir={{.TF_DIR}} plan
+
+  apply:
+    desc: Apply Terraform changes
+    cmds:
+      - terraform -chdir={{.TF_DIR}} apply

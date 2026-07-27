@@ -1,8 +1,9 @@
 .terraform/
-.terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.*
 *.tfvars
 !*.tfvars.example
+kubeconfig
+talosconfig
 crash.log
 crash.*.log
