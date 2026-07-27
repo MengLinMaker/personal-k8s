@@ -1,10 +1,10 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.14.0"
 
   required_providers {
-    hcloud = {
-      source  = "hetznercloud/hcloud"
-      version = "~> 1.50"
+    imager = {
+      source  = "hcloud-talos/imager"
+      version = "1.0.17"
     }
   }
 }

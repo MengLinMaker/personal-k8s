@@ -4,13 +4,8 @@ variable "hcloud_token" {
   sensitive   = true
 }
 
-variable "ssh_key_ids" {
-  description = "Existing Hetzner SSH key IDs/names to attach to the server."
-  type        = list(string)
-}
-
-variable "allowed_ssh_cidrs" {
-  description = "CIDR blocks allowed to access SSH. Set this to your current public IP, e.g. [\"203.0.113.10/32\"]."
+variable "allowed_admin_cidrs" {
+  description = "CIDR blocks allowed to access the Kubernetes and Talos APIs. Set this to your current public IP, e.g. [\"203.0.113.10/32\"]."
   type        = list(string)
 }
 

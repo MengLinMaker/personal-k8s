@@ -1,33 +1,45 @@
-resource "hcloud_firewall" "base" {
-  name   = "personal-k8s-node-1-firewall"
-  labels = var.labels
+locals {
+  talos_schematic_id = "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  talos_version      = "v1.12.8"
+}
 
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "22"
-    source_ips = var.allowed_ssh_cidrs
+resource "imager_image" "talos_x86" {
+  image_url    = "https://factory.talos.dev/image/${local.talos_schematic_id}/${local.talos_version}/hcloud-amd64.raw.xz"
+  architecture = "x86"
+
+  labels = {
+    version = local.talos_version
   }
 
-  rule {
-    direction  = "in"
-    protocol   = "icmp"
-    source_ips = var.allowed_ssh_cidrs
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
-resource "hcloud_server" "base" {
-  name        = "personal-k8s-node-1"
-  server_type = "cpx12"
-  image       = "ubuntu-24.04"
-  location    = "fsn1"
-  ssh_keys    = var.ssh_key_ids
-  labels      = var.labels
+module "talos" {
+  source  = "hcloud-talos/talos/hcloud"
+  version = "3.4.13"
 
-  firewall_ids = [hcloud_firewall.base.id]
+  hcloud_token       = var.hcloud_token
+  cluster_name       = "personal-k8s"
+  location_name      = "fsn1"
+  talos_version      = local.talos_version
+  kubernetes_version = "1.35.6"
+  talos_image_id_x86 = imager_image.talos_x86.image_id
 
-  public_net {
-    ipv4_enabled = true
-    ipv6_enabled = true
-  }
+  firewall_use_current_ip   = false
+  firewall_kube_api_source  = var.allowed_admin_cidrs
+  firewall_talos_api_source = var.allowed_admin_cidrs
+
+  control_plane_nodes = [
+    {
+      id     = 1
+      type   = "cpx12"
+      labels = var.labels
+    }
+  ]
+
+  control_plane_allow_schedule = true
+  deploy_cilium                = true
+  worker_nodes                 = []
 }
