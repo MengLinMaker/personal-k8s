@@ -1,10 +1,21 @@
 locals {
-  talos_schematic_id = "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
-  talos_version      = "v1.12.8"
+  talos_version = "v1.12.8"
+}
+
+resource "talos_image_factory_schematic" "hcloud" {
+  schematic = yamlencode({
+    customization = {
+      systemExtensions = {
+        officialExtensions = [
+          "siderolabs/tailscale",
+        ]
+      }
+    }
+  })
 }
 
 resource "imager_image" "talos_x86" {
-  image_url    = "https://factory.talos.dev/image/${local.talos_schematic_id}/${local.talos_version}/hcloud-amd64.raw.xz"
+  image_url    = "https://factory.talos.dev/image/${talos_image_factory_schematic.hcloud.id}/${local.talos_version}/hcloud-amd64.raw.xz"
   architecture = "x86"
 
   labels = {
@@ -26,6 +37,10 @@ module "talos" {
   talos_version      = local.talos_version
   kubernetes_version = "1.35.6"
   talos_image_id_x86 = imager_image.talos_x86.image_id
+  tailscale = {
+    enabled  = true
+    auth_key = var.tailscale_auth_key
+  }
 
   firewall_use_current_ip   = false
   firewall_kube_api_source  = var.allowed_admin_cidrs

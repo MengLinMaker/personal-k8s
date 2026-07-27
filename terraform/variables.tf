@@ -4,6 +4,12 @@ variable "hcloud_token" {
   sensitive   = true
 }
 
+variable "tailscale_auth_key" {
+  description = "Tailscale auth key used to join Talos nodes to the tailnet."
+  type        = string
+  sensitive   = true
+}
+
 variable "allowed_admin_cidrs" {
   description = "CIDR blocks allowed to access the Kubernetes and Talos APIs. Set this to your current public IP, e.g. [\"203.0.113.10/32\"]."
   type        = list(string)

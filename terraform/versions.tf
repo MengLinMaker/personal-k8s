@@ -16,5 +16,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.4.1"
     }
+
+    talos = {
+      source  = "siderolabs/talos"
+      version = "0.11.0"
+    }
   }
 }
