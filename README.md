@@ -6,7 +6,7 @@ Provisioning a Kubernetes cluster for personal projects.
 
 Technologies are chosen to form a base layer that can be used for other projects.
 
-- Terraform - to provision infrastructure
+- OpenTofu - to provision infrastructure
 - Talos - Operating system with K8s preinstalled
 - Cilium - K8s CNI - also for eBPF observability
 - ArgoCD - to deploy to cluster using gitops
@@ -17,7 +17,7 @@ Technologies are chosen to form a base layer that can be used for other projects
 Install the local tools:
 
 ```sh
-brew install go-task/tap/go-task terraform helm kubectl talosctl
+brew install go-task/tap/go-task opentofu helm kubectl talosctl
 ```
 
 You also need a Hetzner Cloud API token with read/write access to the project.
