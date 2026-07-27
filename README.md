@@ -33,3 +33,13 @@ List available tasks:
 ```sh
 task
 ```
+
+## Experiments
+
+There is also a separate single-node k3s experiment at `hetzner-k3s`. It is intentionally outside the Dokploy/OpenTofu path.
+
+The k3s experiment also needs:
+
+```sh
+brew install vitobotta/tap/hetzner_k3s fluxcd/tap/flux kubectl
+```

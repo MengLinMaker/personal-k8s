@@ -7,3 +7,4 @@ kubeconfig
 talosconfig
 crash.log
 crash.*.log
+.env

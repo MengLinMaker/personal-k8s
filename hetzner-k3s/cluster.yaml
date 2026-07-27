@@ -1,0 +1,54 @@
+---
+cluster_name: personal-k3s
+kubeconfig_path: ./kubeconfig
+k3s_version: v1.32.0+k3s1
+config_format_version: 1
+
+networking:
+  ssh:
+    port: 22
+    use_agent: false
+    public_key_path: ~/.ssh/personal_k3s_ed25519.pub
+    private_key_path: ~/.ssh/personal_k3s_ed25519
+  allowed_networks:
+    ssh:
+      - 116.91.213.159/32
+    api:
+      - 116.91.213.159/32
+  public_network:
+    ipv4: true
+    ipv6: true
+  private_network:
+    enabled: true
+    subnet: 10.0.0.0/16
+  cni:
+    enabled: true
+    mode: cilium
+
+datastore:
+  mode: etcd
+
+schedule_workloads_on_masters: true
+protect_against_deletion: false
+
+masters_pool:
+  instance_type: cpx12
+  instance_count: 1
+  locations:
+    - fsn1
+
+worker_node_pools: []
+
+addons:
+  csi_driver:
+    enabled: false
+  system_upgrade_controller:
+    enabled: false
+  traefik:
+    enabled: false
+  servicelb:
+    enabled: false
+  metrics_server:
+    enabled: true
+  cluster_autoscaler:
+    enabled: false

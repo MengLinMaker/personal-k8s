@@ -2,9 +2,7 @@ version: "3"
 
 vars:
   TF_DIR: terraform
-  IMAGE_DIR: terraform/image
-  CLUSTER_DIR: terraform/cluster
-  DOKPLOY_DIR: terraform/dokploy
+  K3S_DIR: hetzner-k3s
 
 tasks:
   default:
@@ -28,7 +26,7 @@ tasks:
   lint:
     desc: Lint OpenTofu configuration
     cmds:
-      - tofu -chdir={{.DOKPLOY_DIR}} validate
+      - tofu -chdir={{.TF_DIR}} validate
 
   watch:lint:
     desc: Watch OpenTofu files and lint on change; does not touch live infrastructure
@@ -37,7 +35,7 @@ tasks:
       - "{{.TF_DIR}}/**/*.tf"
       - "{{.TF_DIR}}/**/*.tfvars"
     cmds:
-      - tofu -chdir={{.DOKPLOY_DIR}} validate
+      - tofu -chdir={{.TF_DIR}} validate
 
   check:
     desc: Format and lint OpenTofu
@@ -51,34 +49,100 @@ tasks:
       - "{{.TF_DIR}}/**/*.tfvars"
     cmds:
       - tofu -chdir={{.TF_DIR}} fmt -recursive
-      - tofu -chdir={{.DOKPLOY_DIR}} validate
+      - tofu -chdir={{.TF_DIR}} validate
 
-  plan:image:
-    desc: Plan Talos image changes
+  k3s:gen:ssh:
+    desc: Generate the dedicated SSH key used by the hetzner-k3s experiment
     cmds:
-      - tofu -chdir={{.IMAGE_DIR}} plan
+      - |
+        if [ -e "$HOME/.ssh/personal_k3s_ed25519" ]; then
+          echo "$HOME/.ssh/personal_k3s_ed25519 already exists"
+          exit 0
+        fi
+        ssh-keygen -t ed25519 -N "" -C personal-k3s -f "$HOME/.ssh/personal_k3s_ed25519"
 
-  apply:image:
-    desc: Apply Talos image changes
+  k3s:deploy:
+    desc: Create the single-node hetzner-k3s cluster
+    dir: "{{.K3S_DIR}}"
+    dotenv:
+      - .env
+    deps:
+      - k3s:gen:ssh
+    preconditions:
+      - sh: test -n "$HCLOUD_TOKEN"
+        msg: HCLOUD_TOKEN must be set
+      - sh: test -f cluster.yaml
+        msg: hetzner-k3s/cluster.yaml is missing
     cmds:
-      - tofu -chdir={{.IMAGE_DIR}} apply
+      - DEBUG=true hetzner-k3s create --config cluster.yaml --skip-current-ip-validation
 
-  plan:cluster:
-    desc: Plan cluster changes
+  k3s:destroy:
+    desc: Delete the single-node hetzner-k3s cluster
+    dir: "{{.K3S_DIR}}"
+    dotenv:
+      - .env
+    preconditions:
+      - sh: test -n "$HCLOUD_TOKEN"
+        msg: HCLOUD_TOKEN must be set
+      - sh: test -f cluster.yaml
+        msg: hetzner-k3s/cluster.yaml is missing
     cmds:
-      - tofu -chdir={{.CLUSTER_DIR}} plan
+      - hetzner-k3s delete --config cluster.yaml
 
-  apply:cluster:
-    desc: Apply cluster changes
+  k3s:ssh:
+    desc: SSH into the single-node hetzner-k3s server
+    dir: "{{.K3S_DIR}}"
+    dotenv:
+      - .env
+    preconditions:
+      - sh: test -n "$K3S_HOST"
+        msg: K3S_HOST must be set, e.g. K3S_HOST=138.199.152.218
+      - sh: test -f ~/.ssh/personal_k3s_ed25519
+        msg: Run task k3s:gen:ssh first
     cmds:
-      - tofu -chdir={{.CLUSTER_DIR}} apply
+      - ssh -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST"
 
-  plan:dokploy:
-    desc: Plan Dokploy server changes
+  k3s:ssh:check:
+    desc: Check non-interactive SSH connectivity used by provisioning tools
+    dir: "{{.K3S_DIR}}"
+    dotenv:
+      - .env
+    preconditions:
+      - sh: test -n "$K3S_HOST"
+        msg: K3S_HOST must be set, e.g. K3S_HOST=138.199.152.218
+      - sh: test -f ~/.ssh/personal_k3s_ed25519
+        msg: Run task k3s:gen:ssh first
     cmds:
-      - tofu -chdir={{.DOKPLOY_DIR}} plan
+      - ssh -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=10 -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST" 'hostname && whoami && cloud-init status --long'
 
-  apply:dokploy:
-    desc: Apply Dokploy server changes
+  k3s:kubectl:
+    desc: Run kubectl against the single-node hetzner-k3s cluster
+    dir: "{{.K3S_DIR}}"
+    dotenv:
+      - .env
+    preconditions:
+      - sh: test -f kubeconfig
+        msg: Run task k3s:deploy first
     cmds:
-      - tofu -chdir={{.DOKPLOY_DIR}} apply
+      - KUBECONFIG="$PWD/kubeconfig" kubectl {{.CLI_ARGS}}
+
+  k3s:flux:
+    desc: Bootstrap Flux on the single-node hetzner-k3s cluster
+    dir: "{{.K3S_DIR}}"
+    dotenv:
+      - .env
+    preconditions:
+      - sh: test -n "$GITHUB_TOKEN"
+        msg: GITHUB_TOKEN must be set
+      - sh: test -n "$GITHUB_USER"
+        msg: GITHUB_USER must be set
+      - sh: test -f kubeconfig
+        msg: Run task k3s:deploy first
+    cmds:
+      - |
+        KUBECONFIG="$PWD/kubeconfig" flux bootstrap github \
+          --owner="$GITHUB_USER" \
+          --repository=personal-k8s \
+          --branch=main \
+          --path=clusters/personal-k3s \
+          --personal
