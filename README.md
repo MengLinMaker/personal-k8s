@@ -2,15 +2,19 @@
 
 Provisioning a Kubernetes cluster for personal projects.
 
-## Technologies
+## Deployment Flow
 
 Technologies are chosen to form a base layer that can be used for other projects.
 
-- OpenTofu - to provision infrastructure
-- Talos - Operating system with K8s preinstalled
-- Cilium - K8s CNI - also for eBPF observability
-- ArgoCD - to deploy to cluster using gitops
-- Helm - to install prepackaged K8s configs
+Deployment is layered:
+
+1. OpenTofu provisions Hetzner infrastructure and the Talos image.
+2. Talos boots and forms the Kubernetes cluster.
+3. Cilium is installed as the Kubernetes CNI.
+4. OpenTofu installs Argo CD with Helm.
+5. OpenTofu creates the root Argo CD Application.
+6. Argo CD pulls `kubernetes/` from this repo.
+7. Argo CD installs baseline controllers such as cert-manager and Argo Rollouts.
 
 ## Dependencies
 
