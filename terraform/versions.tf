@@ -11,5 +11,10 @@ terraform {
       source  = "hcloud-talos/imager"
       version = "1.0.17"
     }
+
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.4.1"
+    }
   }
 }

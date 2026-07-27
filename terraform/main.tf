@@ -54,3 +54,37 @@ resource "helm_release" "argocd" {
 
   depends_on = [module.talos]
 }
+
+resource "kubectl_manifest" "argocd_root" {
+  yaml_body = yamlencode({
+    apiVersion = "argoproj.io/v1alpha1"
+    kind       = "Application"
+    metadata = {
+      name      = "personal-k8s-platform"
+      namespace = "argocd"
+    }
+    spec = {
+      project = "default"
+      source = {
+        repoURL        = "https://github.com/MengLinMaker/personal-k8s.git"
+        targetRevision = "main"
+        path           = "kubernetes"
+        directory = {
+          recurse = true
+        }
+      }
+      destination = {
+        server    = "https://kubernetes.default.svc"
+        namespace = "argocd"
+      }
+      syncPolicy = {
+        automated = {
+          prune    = true
+          selfHeal = true
+        }
+      }
+    }
+  })
+
+  depends_on = [helm_release.argocd]
+}
