@@ -126,6 +126,17 @@ tasks:
     cmds:
       - KUBECONFIG="$PWD/kubeconfig" kubectl {{.CLI_ARGS}}
 
+  k3s:k9s:
+    desc: Open k9s against the single-node hetzner-k3s cluster
+    dir: "{{.K3S_DIR}}"
+    dotenv:
+      - .env
+    preconditions:
+      - sh: test -f kubeconfig
+        msg: Run task k3s:deploy first
+    cmds:
+      - KUBECONFIG="$PWD/kubeconfig" k9s {{.CLI_ARGS}}
+
   k3s:hubble:
     desc: Port-forward Hubble UI locally
     dir: "{{.K3S_DIR}}"

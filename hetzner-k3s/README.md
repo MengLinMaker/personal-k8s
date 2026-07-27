@@ -58,6 +58,12 @@ task k3s:kubectl -- top nodes
 task k3s:kubectl -- top pods -A --sort-by=cpu
 ```
 
+k9s:
+
+```sh
+task k3s:k9s
+```
+
 Hubble UI:
 
 ```sh
