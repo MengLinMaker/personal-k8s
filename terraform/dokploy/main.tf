@@ -2,20 +2,6 @@ locals {
   server_name = "personal-dokploy-node-1"
   server_type = "cpx12"
   location    = "fsn1"
-
-  tailscale_cloud_init = var.enable_tailscale ? [
-    {
-      path        = "/root/.tailscale-auth-key"
-      owner       = "root:root"
-      permissions = "0600"
-      content     = var.tailscale_auth_key
-    }
-  ] : []
-
-  tailscale_runcmd = var.enable_tailscale ? [
-    "curl -fsSL https://tailscale.com/install.sh | sh",
-    "tailscale up --auth-key=file:/root/.tailscale-auth-key --ssh --hostname=${local.server_name}",
-  ] : []
 }
 
 resource "hcloud_firewall" "dokploy" {
@@ -77,27 +63,15 @@ resource "hcloud_server" "dokploy" {
     hcloud_firewall.dokploy.id,
   ]
 
-  user_data = yamlencode({
-    package_update  = true
-    package_upgrade = true
-    packages = [
-      "ca-certificates",
-      "curl",
-      "gnupg",
-    ]
-    write_files = local.tailscale_cloud_init
-    runcmd = concat(
-      [
-        "curl -sSL https://dokploy.com/install.sh | sh",
-      ],
-      local.tailscale_runcmd,
-    )
-  })
-
-  lifecycle {
-    precondition {
-      condition     = !var.enable_tailscale || var.tailscale_auth_key != null
-      error_message = "Set tailscale_auth_key when enable_tailscale is true."
-    }
-  }
+  user_data = <<-EOT
+    #cloud-config
+    package_update: true
+    package_upgrade: true
+    packages:
+      - ca-certificates
+      - curl
+      - gnupg
+    runcmd:
+      - curl -sSL https://dokploy.com/install.sh | sh
+  EOT
 }
