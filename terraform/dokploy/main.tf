@@ -18,19 +18,6 @@ locals {
   ] : []
 }
 
-resource "terraform_data" "tailscale_auth_key_required" {
-  count = var.enable_tailscale && var.tailscale_auth_key == null ? 1 : 0
-
-  input = "Set tailscale_auth_key when enable_tailscale is true."
-
-  lifecycle {
-    precondition {
-      condition     = false
-      error_message = "Set tailscale_auth_key when enable_tailscale is true."
-    }
-  }
-}
-
 resource "hcloud_firewall" "dokploy" {
   name   = local.server_name
   labels = var.labels
@@ -106,4 +93,11 @@ resource "hcloud_server" "dokploy" {
       local.tailscale_runcmd,
     )
   })
+
+  lifecycle {
+    precondition {
+      condition     = !var.enable_tailscale || var.tailscale_auth_key != null
+      error_message = "Set tailscale_auth_key when enable_tailscale is true."
+    }
+  }
 }

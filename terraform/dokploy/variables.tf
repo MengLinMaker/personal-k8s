@@ -15,6 +15,11 @@ variable "tailscale_auth_key" {
   type        = string
   default     = null
   sensitive   = true
+
+  validation {
+    condition     = var.tailscale_auth_key == null || trimspace(var.tailscale_auth_key) != ""
+    error_message = "tailscale_auth_key must be null or a non-empty string."
+  }
 }
 
 variable "enable_tailscale" {
