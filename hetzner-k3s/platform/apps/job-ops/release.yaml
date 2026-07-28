@@ -1,0 +1,15 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: job-ops
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./deploy/kustomize
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: job-ops
+  targetNamespace: job-ops
+  wait: true
+  timeout: 5m
