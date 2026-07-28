@@ -43,3 +43,5 @@ The k3s experiment also needs:
 ```sh
 brew install vitobotta/tap/hetzner_k3s fluxcd/tap/flux kubectl
 ```
+
+Flux is installed manually for the k3s experiment. App repo registrations are applied from `hetzner-k3s/platform/apps`.

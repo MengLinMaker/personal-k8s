@@ -10,13 +10,16 @@ tasks:
     cmds:
       - task --list
 
+  # OpenTofu checks
   fmt:
     desc: Format OpenTofu files
+    internal: true
     cmds:
       - tofu -chdir={{.TF_DIR}} fmt -recursive
 
   watch:fmt:
     desc: Watch OpenTofu files and format on change; does not touch live infrastructure
+    internal: true
     watch: true
     sources:
       - "{{.TF_DIR}}/**/*.tf"
@@ -25,11 +28,13 @@ tasks:
 
   lint:
     desc: Lint OpenTofu configuration
+    internal: true
     cmds:
       - tofu -chdir={{.TF_DIR}} validate
 
   watch:lint:
     desc: Watch OpenTofu files and lint on change; does not touch live infrastructure
+    internal: true
     watch: true
     sources:
       - "{{.TF_DIR}}/**/*.tf"
@@ -51,8 +56,8 @@ tasks:
       - tofu -chdir={{.TF_DIR}} fmt -recursive
       - tofu -chdir={{.TF_DIR}} validate
 
+  # k3s lifecycle
   k3s:gen:ssh:
-    desc: Generate the dedicated SSH key used by the hetzner-k3s experiment
     cmds:
       - |
         if [ -e "$HOME/.ssh/personal_k3s_ed25519" ]; then
@@ -76,6 +81,12 @@ tasks:
     cmds:
       - DEBUG=true hetzner-k3s create --config cluster.yaml --skip-current-ip-validation
 
+  k3s:bootstrap:
+    desc: Create the k3s cluster and sync baseline platform resources
+    cmds:
+      - task k3s:deploy
+      - task k3s:sync
+
   k3s:destroy:
     desc: Delete the single-node hetzner-k3s cluster
     dir: "{{.K3S_DIR}}"
@@ -89,6 +100,13 @@ tasks:
     cmds:
       - hetzner-k3s delete --config cluster.yaml
 
+  k3s:sync:
+    desc: Ensure Flux is installed and apply local platform resources
+    cmds:
+      - task k3s:flux
+      - task k3s:apply-platform
+
+  # k3s access and debugging
   k3s:ssh:
     desc: SSH into the single-node hetzner-k3s server
     dir: "{{.K3S_DIR}}"
@@ -103,7 +121,6 @@ tasks:
       - ssh -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST"
 
   k3s:ssh:check:
-    desc: Check non-interactive SSH connectivity used by provisioning tools
     dir: "{{.K3S_DIR}}"
     dotenv:
       - .env
@@ -149,7 +166,6 @@ tasks:
       - KUBECONFIG="$PWD/kubeconfig" kubectl -n kube-system port-forward svc/hubble-ui 12000:80
 
   k3s:flux:
-    desc: Install Flux and point it at the public personal-k8s repo
     dir: "{{.K3S_DIR}}"
     dotenv:
       - .env
@@ -158,5 +174,21 @@ tasks:
         msg: Run task k3s:deploy first
     cmds:
       - KUBECONFIG="$PWD/kubeconfig" flux install
-      - KUBECONFIG="$PWD/kubeconfig" flux create source git personal-k8s --url=https://github.com/MengLinMaker/personal-k8s --branch=main --interval=10m
-      - KUBECONFIG="$PWD/kubeconfig" flux create kustomization personal-k8s --source=personal-k8s --path=./clusters/personal-k3s --prune=true --interval=10m
+
+  k3s:apply-platform:
+    dir: "{{.K3S_DIR}}"
+    dotenv:
+      - .env
+    preconditions:
+      - sh: test -f kubeconfig
+        msg: Run task k3s:deploy first
+      - sh: test -f platform/kustomization.yaml
+        msg: hetzner-k3s/platform/kustomization.yaml is missing
+    cmds:
+      - |
+        rendered="$(kubectl kustomize platform)"
+        if [ -z "$rendered" ]; then
+          echo "No platform resources to apply"
+        else
+          printf '%s\n' "$rendered" | KUBECONFIG="$PWD/kubeconfig" kubectl apply -f -
+        fi
