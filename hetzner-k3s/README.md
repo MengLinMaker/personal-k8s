@@ -7,6 +7,7 @@ This is a lean Kubernetes experiment using `vitobotta/hetzner-k3s`:
 - Cilium CNI without Hubble UI/relay by default
 - no Argo Rollouts
 - no metrics stack by default
+- Traefik for HTTP ingress/routing
 - Flux for low-overhead app GitOps
 
 ## Install tools

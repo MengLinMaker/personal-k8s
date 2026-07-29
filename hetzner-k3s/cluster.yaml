@@ -48,7 +48,7 @@ addons:
   system_upgrade_controller:
     enabled: false
   traefik:
-    enabled: false
+    enabled: true
   servicelb:
     enabled: false
   metrics_server:
