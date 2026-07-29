@@ -31,10 +31,11 @@ tasks:
         DEBUG=true hetzner-k3s create --config cluster.yaml --skip-current-ip-validation
 
   bootstrap:
-    desc: Create the k3s cluster and sync baseline platform resources
+    desc: Create the k3s cluster, sync platform resources, and install Tailscale
     cmds:
       - task deploy
       - task sync
+      - task tailscale
 
   destroy:
     desc: Delete the single-node hetzner-k3s cluster
@@ -47,7 +48,7 @@ tasks:
         [ -f .env ] && . ./.env
         set +a
         : "${HCLOUD_TOKEN:?HCLOUD_TOKEN must be set}"
-        hetzner-k3s delete --config cluster.yaml
+        hetzner-k3s delete --config cluster.yaml --force
 
   sync:
     desc: Ensure Flux is installed and apply local platform resources
@@ -66,7 +67,32 @@ tasks:
         [ -f .env ] && . ./.env
         set +a
         : "${K3S_HOST:?K3S_HOST must be set, e.g. K3S_HOST=138.199.152.218}"
-        ssh -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST"
+        ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST"
+
+  reset:ssh:
+    desc: Remove the k3s server from SSH known_hosts
+    cmds:
+      - |
+        set -a
+        [ -f .env ] && . ./.env
+        set +a
+        : "${K3S_HOST:?K3S_HOST must be set, e.g. K3S_HOST=138.199.152.218}"
+        ssh-keygen -R "$K3S_HOST"
+
+  tailscale:
+    desc: Install and authenticate Tailscale on the k3s server
+    preconditions:
+      - sh: test -f ~/.ssh/personal_k3s_ed25519
+        msg: Run task gen:ssh first
+    cmds:
+      - |
+        set -a
+        [ -f .env ] && . ./.env
+        set +a
+        : "${K3S_HOST:?K3S_HOST must be set, e.g. K3S_HOST=138.199.152.218}"
+        : "${TAILSCALE_AUTH_KEY:?TAILSCALE_AUTH_KEY must be set}"
+        ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST" \
+          "curl -fsSL https://tailscale.com/install.sh | sh && tailscale up --ssh --auth-key='$TAILSCALE_AUTH_KEY'"
 
   ssh:check:
     preconditions:
@@ -78,7 +104,7 @@ tasks:
         [ -f .env ] && . ./.env
         set +a
         : "${K3S_HOST:?K3S_HOST must be set, e.g. K3S_HOST=138.199.152.218}"
-        ssh -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=10 -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST" 'hostname && whoami && cloud-init status --long'
+        ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=10 -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST" 'hostname && whoami && cloud-init status --long'
 
   kubectl:
     desc: Run kubectl against the single-node hetzner-k3s cluster

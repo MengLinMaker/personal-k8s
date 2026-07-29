@@ -28,6 +28,7 @@ Edit `.env` and set:
 
 - `HCLOUD_TOKEN`
 - `K3S_HOST`
+- `TAILSCALE_AUTH_KEY`
 
 Edit `cluster.yaml`:
 
@@ -42,7 +43,7 @@ export KUBECONFIG=$PWD/kubeconfig
 kubectl get nodes
 ```
 
-`bootstrap` creates the cluster, ensures Flux is installed, then applies local platform registrations. `deploy` always runs with `DEBUG=true` and skips hetzner-k3s current IP validation. Firewall access is still controlled by `allowed_networks` in `cluster.yaml`.
+`bootstrap` creates the cluster, ensures Flux is installed, applies local platform registrations, then installs Tailscale over SSH. `deploy` always runs with `DEBUG=true` and skips hetzner-k3s current IP validation. Firewall access is still controlled by `allowed_networks` in `cluster.yaml`.
 
 SSH:
 

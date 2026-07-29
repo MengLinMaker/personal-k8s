@@ -55,4 +55,14 @@ tasks:
         [ -f .env ] && . ./.env
         set +a
         : "${DOKPLOY_HOST:?DOKPLOY_HOST must be set, e.g. DOKPLOY_HOST=178.104.183.3}"
-        ssh -i "${DOKPLOY_SSH_KEY:-$HOME/.ssh/personal_dokploy_ed25519}" root@"$DOKPLOY_HOST"
+        ssh -o StrictHostKeyChecking=accept-new -i "${DOKPLOY_SSH_KEY:-$HOME/.ssh/personal_dokploy_ed25519}" root@"$DOKPLOY_HOST"
+
+  reset:ssh:
+    desc: Remove the Dokploy server from SSH known_hosts
+    cmds:
+      - |
+        set -a
+        [ -f .env ] && . ./.env
+        set +a
+        : "${DOKPLOY_HOST:?DOKPLOY_HOST must be set, e.g. DOKPLOY_HOST=178.104.183.3}"
+        ssh-keygen -R "$DOKPLOY_HOST"
