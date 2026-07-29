@@ -1,0 +1,127 @@
+version: "3"
+
+tasks:
+  default:
+    desc: List available k3s tasks
+    cmds:
+      - task --list
+
+  gen:ssh:
+    cmds:
+      - |
+        if [ -e "$HOME/.ssh/personal_k3s_ed25519" ]; then
+          echo "$HOME/.ssh/personal_k3s_ed25519 already exists"
+          exit 0
+        fi
+        ssh-keygen -t ed25519 -N "" -C personal-k3s -f "$HOME/.ssh/personal_k3s_ed25519"
+
+  deploy:
+    desc: Create the single-node hetzner-k3s cluster
+    deps:
+      - gen:ssh
+    preconditions:
+      - sh: test -f cluster.yaml
+        msg: cluster.yaml is missing
+    cmds:
+      - |
+        set -a
+        [ -f .env ] && . ./.env
+        set +a
+        : "${HCLOUD_TOKEN:?HCLOUD_TOKEN must be set}"
+        DEBUG=true hetzner-k3s create --config cluster.yaml --skip-current-ip-validation
+
+  bootstrap:
+    desc: Create the k3s cluster and sync baseline platform resources
+    cmds:
+      - task deploy
+      - task sync
+
+  destroy:
+    desc: Delete the single-node hetzner-k3s cluster
+    preconditions:
+      - sh: test -f cluster.yaml
+        msg: cluster.yaml is missing
+    cmds:
+      - |
+        set -a
+        [ -f .env ] && . ./.env
+        set +a
+        : "${HCLOUD_TOKEN:?HCLOUD_TOKEN must be set}"
+        hetzner-k3s delete --config cluster.yaml
+
+  sync:
+    desc: Ensure Flux is installed and apply local platform resources
+    cmds:
+      - task flux
+      - task apply-platform
+
+  ssh:
+    desc: SSH into the single-node hetzner-k3s server
+    preconditions:
+      - sh: test -f ~/.ssh/personal_k3s_ed25519
+        msg: Run task gen:ssh first
+    cmds:
+      - |
+        set -a
+        [ -f .env ] && . ./.env
+        set +a
+        : "${K3S_HOST:?K3S_HOST must be set, e.g. K3S_HOST=138.199.152.218}"
+        ssh -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST"
+
+  ssh:check:
+    preconditions:
+      - sh: test -f ~/.ssh/personal_k3s_ed25519
+        msg: Run task gen:ssh first
+    cmds:
+      - |
+        set -a
+        [ -f .env ] && . ./.env
+        set +a
+        : "${K3S_HOST:?K3S_HOST must be set, e.g. K3S_HOST=138.199.152.218}"
+        ssh -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=10 -i ~/.ssh/personal_k3s_ed25519 root@"$K3S_HOST" 'hostname && whoami && cloud-init status --long'
+
+  kubectl:
+    desc: Run kubectl against the single-node hetzner-k3s cluster
+    preconditions:
+      - sh: test -f kubeconfig
+        msg: Run task deploy first
+    cmds:
+      - KUBECONFIG="$PWD/kubeconfig" kubectl {{.CLI_ARGS}}
+
+  k9s:
+    desc: Open k9s against the single-node hetzner-k3s cluster
+    preconditions:
+      - sh: test -f kubeconfig
+        msg: Run task deploy first
+    cmds:
+      - KUBECONFIG="$PWD/kubeconfig" k9s {{.CLI_ARGS}}
+
+  hubble:
+    desc: Port-forward Hubble UI locally when Hubble is installed
+    preconditions:
+      - sh: test -f kubeconfig
+        msg: Run task deploy first
+    cmds:
+      - KUBECONFIG="$PWD/kubeconfig" kubectl -n kube-system port-forward svc/hubble-ui 12000:80
+
+  flux:
+    preconditions:
+      - sh: test -f kubeconfig
+        msg: Run task deploy first
+    cmds:
+      - KUBECONFIG="$PWD/kubeconfig" flux install
+
+  apply-platform:
+    preconditions:
+      - sh: test -f kubeconfig
+        msg: Run task deploy first
+      - sh: test -f platform/kustomization.yaml
+        msg: platform/kustomization.yaml is missing
+    cmds:
+      - |
+        rendered="$(kubectl kustomize platform)"
+        if [ -z "$rendered" ]; then
+          echo "No platform resources to apply"
+        else
+          printf '%s\n' "$rendered" | KUBECONFIG="$PWD/kubeconfig" kubectl apply -f -
+        fi

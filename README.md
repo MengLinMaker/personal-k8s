@@ -18,6 +18,7 @@ Copy the example variables file and fill in the required values:
 
 ```sh
 cp hetzner-dokploy/terraform/terraform.tfvars.example hetzner-dokploy/terraform/terraform.tfvars
+cp hetzner-dokploy/.env.example hetzner-dokploy/.env
 ```
 
 `terraform.tfvars` files are ignored by git because they contain secrets and local network details.
@@ -43,10 +44,17 @@ For an existing server created without an SSH key, OpenTofu may need to replace 
 
 ## Commands
 
-List available tasks:
+List root tasks:
 
 ```sh
 task
+```
+
+Each stack also has its own Taskfile:
+
+```sh
+cd hetzner-dokploy && task
+cd hetzner-k3s && task
 ```
 
 ## Experiments
