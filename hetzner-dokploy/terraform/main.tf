@@ -9,10 +9,10 @@ resource "hcloud_firewall" "dokploy" {
   labels = var.labels
 
   rule {
-    description = "Allow SSH from admin CIDRs"
+    description = "Allow all TCP from admin CIDRs"
     direction   = "in"
     protocol    = "tcp"
-    port        = "22"
+    port        = "1-65535"
     source_ips  = var.allowed_admin_cidrs
   }
 
@@ -39,11 +39,14 @@ resource "hcloud_firewall" "dokploy" {
   }
 
   rule {
-    description = "Allow Dokploy panel from admin CIDRs"
+    description = "Allow public app ports"
     direction   = "in"
     protocol    = "tcp"
-    port        = "3000"
-    source_ips  = var.allowed_admin_cidrs
+    port        = "3001-3100"
+    source_ips = [
+      "0.0.0.0/0",
+      "::/0",
+    ]
   }
 }
 
