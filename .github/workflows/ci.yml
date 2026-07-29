@@ -27,7 +27,7 @@ jobs:
         uses: go-task/setup-task@v1
 
       - name: OpenTofu init
-        run: tofu -chdir=terraform/dokploy init -backend=false
+        run: tofu -chdir=hetzner-dokploy/terraform init -backend=false
 
       - name: OpenTofu check
-        run: task check
+        run: task dokploy:check
