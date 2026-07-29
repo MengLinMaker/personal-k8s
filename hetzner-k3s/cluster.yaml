@@ -1,7 +1,7 @@
 ---
 cluster_name: personal-k3s
 kubeconfig_path: ./kubeconfig
-k3s_version: v1.32.0+k3s1
+k3s_version: v1.36.2+k3s1
 config_format_version: 1
 
 networking:
@@ -26,9 +26,10 @@ networking:
     mode: cilium
     cilium:
       helm_values_path: ./cilium-values.yaml
+      chart_version: "v1.19.6"
 
 datastore:
-  mode: etcd
+  mode: sqlite
 
 schedule_workloads_on_masters: true
 protect_against_deletion: false
