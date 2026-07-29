@@ -116,6 +116,13 @@ resource "hcloud_server" "dokploy" {
 
           echo "Installing Tailscale..."
           curl -fsSL https://tailscale.com/install.sh | sh
+          echo "Enabling forwarding for subnet routes..."
+          sysctl -w net.ipv4.ip_forward=1
+          sysctl -w net.ipv6.conf.all.forwarding=1
+          printf '%s\n' \
+            'net.ipv4.ip_forward = 1' \
+            'net.ipv6.conf.all.forwarding = 1' \
+            >/etc/sysctl.d/99-tailscale.conf
           echo "Joining tailnet and advertising $dokploy_subnet..."
           tailscale up --ssh --advertise-routes="$dokploy_subnet" --auth-key=${jsonencode(var.tailscale_auth_key)}
           echo "[$(date --iso-8601=seconds)] Tailscale bootstrap complete"

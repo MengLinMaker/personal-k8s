@@ -41,13 +41,6 @@ task dokploy:ssh
 
 For an existing server created without an SSH key, OpenTofu may need to replace the server before direct SSH works. To avoid replacement, add the same public key to `/root/.ssh/authorized_keys` once through the Hetzner web console or rescue mode.
 
-Tailscale bootstrap status and logs can be inspected with:
-
-```sh
-task dokploy:debug
-task dokploy:logs
-```
-
 ## Commands
 
 List available tasks:

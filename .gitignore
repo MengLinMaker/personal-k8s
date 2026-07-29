@@ -8,3 +8,4 @@ talosconfig
 crash.log
 crash.*.log
 .env
+!.env.example
