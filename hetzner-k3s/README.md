@@ -20,10 +20,10 @@ brew install vitobotta/tap/hetzner_k3s fluxcd/tap/flux kubectl
 Create a local environment file:
 
 ```sh
-cp hetzner-k3s/.env.example hetzner-k3s/.env
+cp .env.example .env
 ```
 
-Edit `hetzner-k3s/.env` and set:
+Edit `.env` and set:
 
 - `HCLOUD_TOKEN`
 - `K3S_HOST`
@@ -33,38 +33,38 @@ Edit `cluster.yaml`:
 - check `allowed_networks`
 - optionally change `instance_type` from `cpx12` to `cpx22`
 
-From the repository root, create the cluster:
+From this directory, create the cluster:
 
 ```sh
-task k3s:bootstrap
-export KUBECONFIG=$PWD/hetzner-k3s/kubeconfig
+task bootstrap
+export KUBECONFIG=$PWD/kubeconfig
 kubectl get nodes
 ```
 
-`k3s:bootstrap` creates the cluster, ensures Flux is installed, then applies local platform registrations. `k3s:deploy` always runs with `DEBUG=true` and skips hetzner-k3s current IP validation. Firewall access is still controlled by `allowed_networks` in `cluster.yaml`.
+`bootstrap` creates the cluster, ensures Flux is installed, then applies local platform registrations. `deploy` always runs with `DEBUG=true` and skips hetzner-k3s current IP validation. Firewall access is still controlled by `allowed_networks` in `cluster.yaml`.
 
 SSH:
 
 ```sh
-K3S_HOST=138.199.152.218 task k3s:ssh
+task ssh
 ```
 
 Kubectl:
 
 ```sh
-task k3s:kubectl -- get nodes
+task kubectl -- get nodes
 ```
 
 k9s:
 
 ```sh
-task k3s:k9s
+task k9s
 ```
 
 Hubble UI:
 
 ```sh
-task k3s:hubble
+task hubble
 ```
 
 ## Sync platform
@@ -74,10 +74,10 @@ Flux is installed by this repo, but it does not watch this repo. This keeps the 
 After editing platform registrations, push them from the repository root:
 
 ```sh
-task k3s:sync
+task sync
 ```
 
-Put Flux `GitRepository` and `Kustomization` resources for app repos under `hetzner-k3s/platform/apps`, then add them to `hetzner-k3s/platform/apps/kustomization.yaml`.
+Put Flux `GitRepository` and `Kustomization` resources for app repos under `platform/apps`, then add them to `platform/apps/kustomization.yaml`.
 
 For public app repos, no GitHub token is needed. Flux can pull over HTTPS from the public repository. App repos can then own their own deployment manifests while this repo stays responsible for cluster creation and app registration.
 
@@ -101,5 +101,5 @@ protect_against_deletion: false
 Then:
 
 ```sh
-task k3s:destroy
+task destroy
 ```
