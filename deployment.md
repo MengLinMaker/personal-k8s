@@ -16,7 +16,7 @@ The primary OpenTofu stack is:
 
 | Stack | Path | Purpose |
 | --- | --- | --- |
-| Dokploy | `terraform/dokploy` | Creates the Hetzner VPS, firewall, backups, and Dokploy bootstrap. |
+| Dokploy | `hetzner-dokploy/terraform` | Creates the Hetzner VPS, firewall, backups, and Dokploy bootstrap. |
 
 The older Talos/Kubernetes stacks remain in the repository for reference, but they are no longer the recommended deployment path for this small personal environment.
 
