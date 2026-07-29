@@ -178,7 +178,7 @@ tasks:
       - KUBECONFIG="$PWD/kubeconfig" k9s {{.CLI_ARGS}}
 
   k3s:hubble:
-    desc: Port-forward Hubble UI locally
+    desc: Port-forward Hubble UI locally when Hubble is installed
     dir: "{{.K3S_DIR}}"
     dotenv:
       - .env

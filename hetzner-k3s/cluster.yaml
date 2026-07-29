@@ -24,6 +24,8 @@ networking:
   cni:
     enabled: true
     mode: cilium
+    cilium:
+      helm_values_path: ./cilium-values.yaml
 
 datastore:
   mode: etcd
@@ -49,6 +51,6 @@ addons:
   servicelb:
     enabled: false
   metrics_server:
-    enabled: true
+    enabled: false
   cluster_autoscaler:
     enabled: false

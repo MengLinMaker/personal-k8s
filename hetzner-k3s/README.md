@@ -4,7 +4,7 @@ This is a lean Kubernetes experiment using `vitobotta/hetzner-k3s`:
 
 - one `cpx12` master node
 - workloads scheduled on the master
-- Cilium CNI for better production debugging and network visibility
+- Cilium CNI without Hubble UI/relay by default
 - no Argo Rollouts
 - no metrics stack by default
 - Flux for low-overhead app GitOps
@@ -53,8 +53,6 @@ Kubectl:
 
 ```sh
 task k3s:kubectl -- get nodes
-task k3s:kubectl -- top nodes
-task k3s:kubectl -- top pods -A --sort-by=cpu
 ```
 
 k9s:
@@ -68,8 +66,6 @@ Hubble UI:
 ```sh
 task k3s:hubble
 ```
-
-Then open `http://localhost:12000`.
 
 ## Sync platform
 
@@ -92,7 +88,7 @@ kubectl get pods -A
 flux get all -A
 ```
 
-Flux does not include a dashboard or metrics stack by default. Use `flux get ...`, Kubernetes events, and controller logs for debugging.
+Flux does not include a dashboard or metrics stack by default. Use `flux get ...`, Kubernetes events, and controller logs for debugging. `kubectl top` requires metrics-server, which is disabled by default in this experiment.
 
 ## Delete
 
