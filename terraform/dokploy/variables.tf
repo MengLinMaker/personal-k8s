@@ -8,6 +8,11 @@ variable "tailscale_auth_key" {
   description = "Tailscale auth key used to join the Dokploy server to the tailnet and advertise the Dokploy Docker subnet."
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = startswith(var.tailscale_auth_key, "tskey-auth-")
+    error_message = "tailscale_auth_key must be a Tailscale auth key that starts with tskey-auth-, not a Tailscale API key."
+  }
 }
 
 variable "allowed_admin_cidrs" {
