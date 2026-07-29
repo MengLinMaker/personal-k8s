@@ -9,6 +9,14 @@ resource "hcloud_firewall" "dokploy" {
   labels = var.labels
 
   rule {
+    description = "Allow SSH from admin CIDRs"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "22"
+    source_ips  = var.allowed_admin_cidrs
+  }
+
+  rule {
     description = "Allow HTTP"
     direction   = "in"
     protocol    = "tcp"
@@ -39,6 +47,12 @@ resource "hcloud_firewall" "dokploy" {
   }
 }
 
+resource "hcloud_ssh_key" "dokploy_admin" {
+  name       = "${local.server_name}-admin"
+  public_key = trimspace(var.ssh_public_key)
+  labels     = var.labels
+}
+
 resource "hcloud_server" "dokploy" {
   name        = local.server_name
   image       = "ubuntu-24.04"
@@ -48,6 +62,9 @@ resource "hcloud_server" "dokploy" {
   labels      = var.labels
   firewall_ids = [
     hcloud_firewall.dokploy.id,
+  ]
+  ssh_keys = [
+    hcloud_ssh_key.dokploy_admin.id,
   ]
 
   user_data = <<-EOT

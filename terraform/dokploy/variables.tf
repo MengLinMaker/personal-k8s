@@ -11,8 +11,13 @@ variable "tailscale_auth_key" {
 }
 
 variable "allowed_admin_cidrs" {
-  description = "CIDR blocks allowed to access the Dokploy admin panel."
+  description = "CIDR blocks allowed to access SSH and the Dokploy admin panel."
   type        = list(string)
+}
+
+variable "ssh_public_key" {
+  description = "Public SSH key allowed to log in as root on the Dokploy server."
+  type        = string
 }
 
 variable "labels" {

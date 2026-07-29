@@ -22,9 +22,24 @@ cp terraform/dokploy/terraform.tfvars.example terraform/dokploy/terraform.tfvars
 
 `terraform.tfvars` files are ignored by git because they contain secrets and local network details.
 
+Generate or reuse an SSH key, then put the public key content in `ssh_public_key`:
+
+```sh
+task dokploy:gen:ssh
+cat ~/.ssh/personal_dokploy_ed25519.pub
+```
+
 Apply `terraform/dokploy` to create the server and install Dokploy.
 
 Tailscale is bootstrapped automatically after Dokploy starts installing. The bootstrap script waits for `dokploy-network`, advertises that Docker subnet, and enables Tailscale SSH.
+
+SSH is also enabled directly from `allowed_admin_cidrs` as a fallback:
+
+```sh
+ssh -i ~/.ssh/personal_dokploy_ed25519 root@SERVER_IPV4
+```
+
+For an existing server created without an SSH key, OpenTofu may need to replace the server before direct SSH works. To avoid replacement, add the same public key to `/root/.ssh/authorized_keys` once through the Hetzner web console or rescue mode.
 
 ## Commands
 
