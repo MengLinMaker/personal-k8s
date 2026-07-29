@@ -5,10 +5,10 @@ Deployment is intentionally simple:
 1. OpenTofu provisions one Hetzner VPS.
 2. Hetzner firewall rules expose Dokploy admin access only to admin CIDRs.
 3. HTTP and HTTPS are public for deployed applications.
-4. Cloud-init runs Dokploy's official installer.
-5. Cloud-init starts a background Tailscale bootstrap after one minute.
-6. The Tailscale bootstrap waits for `dokploy-network`, advertises its Docker subnet, and enables Tailscale SSH.
-7. Dokploy installs Docker, initializes Docker Swarm, and exposes the setup UI on port `3000`.
+4. Cloud-init starts Dokploy's official installer in the background because the installer is long-running.
+5. Cloud-init starts the Tailscale bootstrap service.
+6. Dokploy installs Docker, initializes Docker Swarm, and exposes the setup UI on port `3000`.
+7. The Tailscale bootstrap waits for Docker and `dokploy-network`, advertises that Docker subnet, and enables Tailscale SSH.
 
 ## OpenTofu Stacks
 

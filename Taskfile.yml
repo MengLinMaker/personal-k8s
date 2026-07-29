@@ -74,6 +74,38 @@ tasks:
     cmds:
       - ssh -i "${DOKPLOY_SSH_KEY:-$HOME/.ssh/personal_dokploy_ed25519}" root@"$(tofu -chdir={{.TF_DIR}}/dokploy output -raw public_ipv4)"
 
+  dokploy:debug:
+    desc: Print Tailscale bootstrap status on the Dokploy server
+    deps:
+      - dokploy:gen:ssh
+    cmds:
+      - |
+        ssh -i "${DOKPLOY_SSH_KEY:-$HOME/.ssh/personal_dokploy_ed25519}" root@"$(tofu -chdir={{.TF_DIR}}/dokploy output -raw public_ipv4)" '
+          set -eu
+          echo "== tailscale bootstrap service =="
+          systemctl --no-pager status bootstrap-tailscale.service || true
+          echo
+          echo "== tailscale status =="
+          tailscale status || true
+          echo
+          echo "== dokploy-network subnet =="
+          docker network inspect dokploy-network 2>/dev/null | grep -A 2 '"Subnet"' || true
+          echo
+          echo "== recent tailscale bootstrap log =="
+          tail -n 80 /var/log/bootstrap-tailscale.log || true
+        '
+
+  dokploy:logs:
+    desc: Tail Tailscale bootstrap logs on the Dokploy server
+    deps:
+      - dokploy:gen:ssh
+    cmds:
+      - |
+        ssh -i "${DOKPLOY_SSH_KEY:-$HOME/.ssh/personal_dokploy_ed25519}" root@"$(tofu -chdir={{.TF_DIR}}/dokploy output -raw public_ipv4)" '
+          touch /var/log/bootstrap-tailscale.log
+          tail -n 200 -f /var/log/bootstrap-tailscale.log
+        '
+
   # k3s lifecycle
   k3s:gen:ssh:
     cmds:

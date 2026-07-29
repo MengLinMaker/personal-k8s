@@ -36,10 +36,17 @@ Tailscale is bootstrapped automatically after Dokploy starts installing. The boo
 SSH is also enabled directly from `allowed_admin_cidrs` as a fallback:
 
 ```sh
-ssh -i ~/.ssh/personal_dokploy_ed25519 root@SERVER_IPV4
+task dokploy:ssh
 ```
 
 For an existing server created without an SSH key, OpenTofu may need to replace the server before direct SSH works. To avoid replacement, add the same public key to `/root/.ssh/authorized_keys` once through the Hetzner web console or rescue mode.
+
+Tailscale bootstrap status and logs can be inspected with:
+
+```sh
+task dokploy:debug
+task dokploy:logs
+```
 
 ## Commands
 

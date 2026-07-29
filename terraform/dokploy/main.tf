@@ -76,13 +76,30 @@ resource "hcloud_server" "dokploy" {
       - curl
       - gnupg
     write_files:
-      - path: /usr/local/sbin/bootstrap-dokploy
+      - path: /usr/local/sbin/bootstrap-tailscale
         owner: root:root
         permissions: '0700'
         content: |
           #!/usr/bin/env bash
           set -euo pipefail
+          exec > >(tee -a /var/log/bootstrap-tailscale.log) 2>&1
 
+          echo "[$(date --iso-8601=seconds)] Starting Tailscale bootstrap"
+
+          echo "Waiting for Docker..."
+          for _ in $(seq 1 180); do
+            if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+              break
+            fi
+            sleep 10
+          done
+
+          if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+            echo "Docker did not become ready" >&2
+            exit 1
+          fi
+
+          echo "Waiting for dokploy-network..."
           dokploy_subnet=""
           for _ in $(seq 1 180); do
             dokploy_subnet="$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}}{{end}}' dokploy-network 2>/dev/null || true)"
@@ -97,10 +114,30 @@ resource "hcloud_server" "dokploy" {
             exit 1
           fi
 
+          echo "Installing Tailscale..."
           curl -fsSL https://tailscale.com/install.sh | sh
+          echo "Joining tailnet and advertising $dokploy_subnet..."
           tailscale up --ssh --advertise-routes="$dokploy_subnet" --auth-key=${jsonencode(var.tailscale_auth_key)}
+          echo "[$(date --iso-8601=seconds)] Tailscale bootstrap complete"
+      - path: /etc/systemd/system/bootstrap-tailscale.service
+        owner: root:root
+        permissions: '0644'
+        content: |
+          [Unit]
+          Description=Bootstrap Tailscale for Dokploy
+          After=network-online.target docker.service
+          Wants=network-online.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/sbin/bootstrap-tailscale
+          RemainAfterExit=yes
+
+          [Install]
+          WantedBy=multi-user.target
     runcmd:
-      - /usr/local/sbin/bootstrap-dokploy &
-      - curl -sSL https://dokploy.com/install.sh | sh
+      - curl -sSL https://dokploy.com/install.sh | sh &
+      - systemctl daemon-reload
+      - systemctl enable --now bootstrap-tailscale.service
   EOT
 }
